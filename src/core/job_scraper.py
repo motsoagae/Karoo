@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 — Job URL Scraper (NEW)
+Karoo v2.0 — Job URL Scraper (NEW)
 Extracts job descriptions from URLs: LinkedIn, Indeed, PNet, Careers24, Glassdoor, company sites.
 """
 import re
