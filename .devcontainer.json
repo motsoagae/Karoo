@@ -1,7 +1,7 @@
 {
-  "name": "ATS-GOD v2.0 Development",
+  "name": "Karoo v2.0 Development",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "postCreateCommand": "pip install -r requirements.txt && echo '✓ ATS-GOD v2 ready'",
+  "postCreateCommand": "pip install -r requirements.txt && echo '✓ Karoo v2 ready'",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -19,7 +19,7 @@
   "forwardPorts": [8501],
   "portsAttributes": {
     "8501": {
-      "label": "ATS-GOD v2 Streamlit",
+      "label": "Karoo v2 Streamlit",
       "onAutoForward": "openBrowser"
     }
   },
