@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 Exporter
+Karoo v2.0 Exporter
 Generates TXT, DOCX, and PDF reports. Enhanced formatting.
 """
 import io
@@ -22,7 +22,7 @@ def export_to_txt(results: Dict[str, Any]) -> str:
 
     lines = [
         sep,
-        "  ATS-GOD v2.0 — OPTIMIZATION REPORT",
+        "  Karoo v2.0 — OPTIMIZATION REPORT",
         f"  Generated: {datetime.now().strftime('%d %B %Y, %H:%M')}",
         f"  AI Provider: {results.get('llm_provider','Rule-Based')} — {results.get('llm_model','N/A')}",
         f"  AI-Powered Agents: {summary.get('ai_powered_count', 0)}/10",
@@ -90,7 +90,7 @@ def export_to_docx(results: Dict[str, Any], variant: str = "balanced") -> Option
         score = summary.get("overall_score", 0)
 
         # Title
-        title = doc.add_heading('ATS-GOD v2.0 — Optimization Report', 0)
+        title = doc.add_heading('Karoo v2.0 — Optimization Report', 0)
         title.alignment = WD_ALIGN_PARAGRAPH.CENTER
         title.runs[0].font.color.rgb = RGBColor(0x15, 0x65, 0xC0)
 
@@ -223,7 +223,7 @@ def export_to_pdf(results: Dict[str, Any]) -> Optional[bytes]:
         summary = results.get("summary", {})
         score = summary.get("overall_score", 0)
 
-        story.append(Paragraph("ATS-GOD v2.0 — Optimization Report", title_style))
+        story.append(Paragraph("Karoo v2.0 — Optimization Report", title_style))
         story.append(Spacer(1, 0.3*cm))
         story.append(Paragraph(f"Generated: {datetime.now().strftime('%d %B %Y, %H:%M')} | "
                                 f"AI: {results.get('llm_provider','Rule-Based')}", body))
