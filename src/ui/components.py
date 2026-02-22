@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 — Reusable UI Components
+Karoo v2.0 — Reusable UI Components
 """
 
 def score_color(score: int) -> str:
