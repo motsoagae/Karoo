@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 — Visualisation Components
+Karoo v2.0 — Visualisation Components
 Radar chart, score bars, timeline, agent grid.
 """
 from typing import Dict, Optional
