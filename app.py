@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 — Main Streamlit Application
+Karoo v2.0 — Main Streamlit Application
 11 AI Agents | Full CV Rewrite | Interview Coach | Salary Intel | Job URL Scraper
 Groq (free) + OpenAI + Anthropic
 """
