@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 Test Suite
+Karoo v2.0 Test Suite
 All tests run in rule-based mode (no API key needed).
 Run: pytest tests/ -v
 """
