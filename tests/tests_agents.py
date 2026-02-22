@@ -219,7 +219,7 @@ def test_exporter_txt():
     orch = ATSGodOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False, rewrite_cv=False))
     txt = export_to_txt(results)
-    assert "ATS-GOD v2.0" in txt
+    assert "Karoo v2.0" in txt
     assert "OVERALL SCORE" in txt
     assert "PRIORITY ACTION ITEMS" in txt
     assert len(txt) > 1000
