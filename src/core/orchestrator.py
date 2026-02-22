@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 Master Orchestrator
+Karoo v2.0 Master Orchestrator
 11 agents: 8 core + Interview Coach + Salary Intelligence + CV Rewriter
 Supports Groq (free) + OpenAI + Anthropic. Auto-detects API key.
 """
@@ -67,7 +67,7 @@ def create_llm():
     return None, "Rule-Based", "None"
 
 
-class ATSGodOrchestrator:
+class KarooOrchestrator:
     """v2 Master Coordinator — 11 agents, full AI CV rewrite, interview prep, salary intel."""
 
     AGENT_META = {
@@ -103,7 +103,7 @@ class ATSGodOrchestrator:
         self.rewriter = CVRewriterAgent(self.llm)
 
         mode = f"🧠 {self.llm_provider} ({self.llm_model})" if self.ai_mode else "📐 Rule-Based"
-        logger.info(f"ATS-GOD v2 Orchestrator — {mode}")
+        logger.info(f"Karoo v2 Orchestrator — {mode}")
 
     async def optimize(
         self,
@@ -296,7 +296,7 @@ class ATSGodOrchestrator:
         improved_bullet = results.get('recruiter_scanner', AgentOutput()).optimized_content
         sa_summary = results.get('sa_specialist', AgentOutput()).optimized_content
 
-        header = f"╔══════════════════════════════════════════════════════╗\n║  ATS-GOD v2 OPTIMIZED — {ts}  ║\n║             Overall Score: {score}/100                   ║\n╚══════════════════════════════════════════════════════╝\n\n"
+        header = f"╔══════════════════════════════════════════════════════╗\n║  Karoo v2 OPTIMIZED — {ts}  ║\n║             Overall Score: {score}/100                   ║\n╚══════════════════════════════════════════════════════╝\n\n"
 
         ats = f"{header}═══ ATS-MAX VARIANT (Maximum Parse Rate) ═══\n\nOPTIMIZED SUMMARY:\n{algo.optimized_content or clean_summary or '[Apply the ATS-optimized summary from the Algorithm Breaker agent above]'}\n\nMISSING KEYWORDS TO ADD:\n{missing_kw}\n\nSEMANTIC CONTEXT:\n{semantic_bridge or '[Add JD language throughout your experience section]'}\n\n══════════════ YOUR ORIGINAL CV ══════════════\n{original_cv}"
         bal = f"{header}═══ BALANCED VARIANT ⭐ RECOMMENDED ═══\n\nCOMPELLING SUMMARY:\n{career_narrative or clean_summary or '[Apply the career narrative from the Future Architect agent]'}\n\nSTRONGEST ACHIEVEMENT EXAMPLE:\n{improved_bullet or '[Apply the rewritten bullet from the 6-Second Scanner agent]'}\n\n══════════════ YOUR ORIGINAL CV ══════════════\n{original_cv}"
