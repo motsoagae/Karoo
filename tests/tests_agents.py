@@ -79,7 +79,7 @@ def test_all_imports():
     from src.agents.interview_coach import InterviewCoach
     from src.agents.salary_intelligence import SalaryIntelligence
     from src.agents.cv_rewriter_agent import CVRewriterAgent
-    from src.core.orchestrator import ATSGodOrchestrator
+    from src.core.orchestrator import KarooOrchestrator
     from src.core.exporter import export_to_txt
     from src.core.job_scraper import is_valid_url
     print("✓ All 12 modules imported")
@@ -182,8 +182,8 @@ def test_job_scraper_url_validation():
 
 
 def test_orchestrator_full_run():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False, rewrite_cv=False))
     assert "summary" in results
     assert "agent_results" in results
@@ -193,8 +193,8 @@ def test_orchestrator_full_run():
 
 
 def test_orchestrator_summary():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False, rewrite_cv=False))
     s = results["summary"]
     assert 0 <= s["overall_score"] <= 100
@@ -205,8 +205,8 @@ def test_orchestrator_summary():
 
 
 def test_orchestrator_3_variants():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False, rewrite_cv=False))
     v = results["cv_variants"]
     assert all(k in v for k in ["ats_max","balanced","creative"])
@@ -214,9 +214,9 @@ def test_orchestrator_3_variants():
 
 
 def test_exporter_txt():
-    from src.core.orchestrator import ATSGodOrchestrator
+    from src.core.orchestrator import KarooOrchestrator
     from src.core.exporter import export_to_txt
-    orch = ATSGodOrchestrator()
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False, rewrite_cv=False))
     txt = export_to_txt(results)
     assert "Karoo v2.0" in txt
