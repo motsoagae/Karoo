@@ -41,8 +41,7 @@ streamlit-extras>=0.4.0
 python-dotenv>=1.0.0
 pydantic>=2.6.0
 tenacity>=8.2.0
-hashlib2>=1.0.0
-
+# hashlib2 removed, use built-in hashlib
 
 # Testing
 pytest>=8.0.0
