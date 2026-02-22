@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 Test Suite
+Karoo- v2.0 Test Suite
 All tests run in rule-based mode — no API key required.
 Run: pytest tests/ -v
 """
@@ -91,7 +91,7 @@ def test_all_v2_imports():
     from src.agents.linkedin_optimizer import LinkedInOptimizer
     from src.agents.interview_coach import InterviewCoach
     from src.agents.cover_letter_agent import CoverLetterAgent
-    from src.core.orchestrator import ATSGodOrchestrator
+    from src.core.orchestrator import KarooOrchestrator
     from src.core.exporter import export_to_txt, export_to_docx
 
 
@@ -228,8 +228,8 @@ def test_cover_letter_v2():
 # ─── Orchestrator v2 Tests ────────────────────────────────────────────────────
 
 def test_orchestrator_v2_runs_11_agents():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
 
     assert "summary" in results
@@ -243,8 +243,8 @@ def test_orchestrator_v2_runs_11_agents():
 
 
 def test_orchestrator_new_agents_present():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     agents = results["agent_results"]
     assert "linkedin_optimizer" in agents
@@ -252,8 +252,8 @@ def test_orchestrator_new_agents_present():
 
 
 def test_orchestrator_summary_v2():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     s = results["summary"]
     assert "overall_score" in s
@@ -262,23 +262,23 @@ def test_orchestrator_summary_v2():
     assert "top_3" in s             # v2 addition
     assert 0 <= s["overall_score"] <= 100
     assert 0 <= s["interview_probability"] <= 100
-    assert s["recommended_variant"] in ["BALANCED", "ATS-MAX", "CREATIVE"]
+    assert s["recommended_variant"] in ["BALANCED", "Karoo-MAX", "CREATIVE"]
 
 
 def test_orchestrator_3_variants():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     v = results["cv_variants"]
-    assert "ats_max" in v and "balanced" in v and "creative" in v
+    assert "Karoo_max" in v and "balanced" in v and "creative" in v
     assert all(len(x) > 100 for x in v.values())
     # v2 variants should contain original CV
     assert "Jane Smith" in v["balanced"]
 
 
 def test_orchestrator_action_items():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     items = results["action_items"]
     assert isinstance(items, list)
@@ -287,8 +287,8 @@ def test_orchestrator_action_items():
 
 
 def test_orchestrator_metadata_v2():
-    from src.core.orchestrator import ATSGodOrchestrator
-    orch = ATSGodOrchestrator()
+    from src.core.orchestrator import KarooOrchestrator
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     meta = results["metadata"]
     assert meta["version"] == "2.0.0"
@@ -300,12 +300,12 @@ def test_orchestrator_metadata_v2():
 # ─── Exporter Tests ───────────────────────────────────────────────────────────
 
 def test_exporter_txt_v2():
-    from src.core.orchestrator import ATSGodOrchestrator
+    from src.core.orchestrator import KarooOrchestrator
     from src.core.exporter import export_to_txt
-    orch = ATSGodOrchestrator()
+    orch = KarooOrchestrator()
     results = run(orch.optimize(CV, JD, CTX, generate_cover_letter=False))
     txt = export_to_txt(results)
-    assert "ATS-GOD v2.0" in txt
+    assert "Karoo- v2.0" in txt
     assert "OVERALL SCORE" in txt
     assert "PRIORITY ACTION ITEMS" in txt
     assert "AGENT SCORES" in txt
