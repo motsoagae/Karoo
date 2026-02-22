@@ -1,5 +1,5 @@
 """
-ATS-GOD v2.0 — Base Agent
+Karoo v2.0 — Base Agent
 Enhanced with retry logic, structured output validation, and telemetry.
 """
 import os
