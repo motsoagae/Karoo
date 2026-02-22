@@ -1,0 +1,31 @@
+{
+  "name": "ATS-GOD v2.0 Development",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "postCreateCommand": "pip install -r requirements.txt && echo '✓ ATS-GOD v2 ready'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "forwardPorts": [8501],
+  "portsAttributes": {
+    "8501": {
+      "label": "ATS-GOD v2 Streamlit",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "secrets": {
+    "GROQ_API_KEY": { "description": "Groq free API key (console.groq.com)" },
+    "OPENAI_API_KEY": { "description": "OpenAI API key (optional)" },
+    "ANTHROPIC_API_KEY": { "description": "Anthropic API key (optional)" }
+  }
+}
