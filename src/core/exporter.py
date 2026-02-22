@@ -1,6 +1,7 @@
 """
-Karoo v2.0 Exporter
-Generates TXT, DOCX, and PDF reports. Enhanced formatting.
+Karoo v2.1 Exporter
+Generates TXT, DOCX, and PDF reports.
+Includes CV download for all variants, cover letters, and detailed agent reports.
 """
 import io
 from datetime import datetime
@@ -8,6 +9,7 @@ from typing import Dict, Any, Optional
 
 
 def export_to_txt(results: Dict[str, Any]) -> str:
+    """Export full report as plain text."""
     summary = results.get("summary", {})
     score = summary.get("overall_score", 0)
     sep = "=" * 68
@@ -70,12 +72,11 @@ def export_to_txt(results: Dict[str, Any]) -> str:
 
 
 def export_to_docx(results: Dict[str, Any], variant: str = "balanced") -> Optional[bytes]:
+    """Export report as DOCX for a specific CV variant."""
     try:
         from docx import Document
-        from docx.shared import Pt, RGBColor, Inches, Cm
+        from docx.shared import Pt, RGBColor, Cm
         from docx.enum.text import WD_ALIGN_PARAGRAPH
-        from docx.oxml.ns import qn
-        from docx.oxml import OxmlElement
 
         doc = Document()
 
@@ -106,11 +107,10 @@ def export_to_docx(results: Dict[str, Any], variant: str = "balanced") -> Option
             ("Recommended Variant", summary.get('recommended_variant','BALANCED')),
         ]
         for i, (label, val) in enumerate(cells):
-            if i < 3:
-                r = table.rows[i]
-                r.cells[0].text = label
-                r.cells[0].paragraphs[0].runs[0].bold = True
-                r.cells[1].text = val
+            r = table.rows[i]
+            r.cells[0].text = label
+            r.cells[0].paragraphs[0].runs[0].bold = True
+            r.cells[1].text = val
 
         doc.add_paragraph()
         doc.add_paragraph(f"Verdict: {summary.get('verdict','')}")
@@ -155,23 +155,6 @@ def export_to_docx(results: Dict[str, Any], variant: str = "balanced") -> Option
                 if para.strip():
                     doc.add_paragraph(para.strip())
 
-        # Interview Q&A
-        interview = results.get('agent_results', {}).get('interview_coach', {})
-        if interview.get('optimized_content'):
-            doc.add_page_break()
-            doc.add_heading('Interview Preparation', level=1)
-            doc.add_paragraph(interview['optimized_content'][:3000])
-
-        # Salary Intelligence
-        salary = results.get('agent_results', {}).get('salary_intelligence', {})
-        if salary.get('findings'):
-            doc.add_heading('Salary Intelligence', level=1)
-            for f in salary.get('findings', []):
-                doc.add_paragraph(f"• {f}")
-            if salary.get('optimized_content'):
-                doc.add_paragraph("Negotiation Script:")
-                doc.add_paragraph(salary['optimized_content'])
-
         # Full agent reports
         doc.add_page_break()
         doc.add_heading('Detailed Agent Reports', level=1)
@@ -193,12 +176,11 @@ def export_to_docx(results: Dict[str, Any], variant: str = "balanced") -> Option
 
     except ImportError:
         return None
-    except Exception as e:
-        import traceback; traceback.print_exc()
+    except Exception:
         return None
 
 
-def export_to_pdf(results: Dict[str, Any]) -> Optional[bytes]:
+def export_to_pdf(results: Dict[str, Any], variant: Optional[str] = None) -> Optional[bytes]:
     """Export as PDF using reportlab."""
     try:
         from reportlab.lib.pagesizes import A4
@@ -213,7 +195,7 @@ def export_to_pdf(results: Dict[str, Any]) -> Optional[bytes]:
         styles = getSampleStyleSheet()
         story = []
 
-        # Custom styles
+        # Styles
         title_style = ParagraphStyle('Title', parent=styles['Title'],
                                      textColor=colors.HexColor('#1565C0'), fontSize=20)
         h1_style = ParagraphStyle('H1', parent=styles['Heading1'],
@@ -250,45 +232,21 @@ def export_to_pdf(results: Dict[str, Any]) -> Optional[bytes]:
         story.append(t)
         story.append(Spacer(1, 0.5*cm))
 
-        # Agent scores
-        story.append(Paragraph("Agent Scores", h1_style))
-        agent_rows = [["Agent", "Score", "Rating"]]
-        for name, s in summary.get('agent_scores', {}).items():
-            rating = "Excellent" if s>=85 else "Strong" if s>=75 else "Adequate" if s>=60 else "Needs Work"
-            agent_rows.append([name.replace('_',' ').title(), f"{s}/100", rating])
-        at = Table(agent_rows, colWidths=[9*cm, 4*cm, 5*cm])
-        at.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1565C0')),
-            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
-            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f0f4ff')]),
-            ('FONTSIZE', (0,0), (-1,-1), 9),
-            ('PADDING', (0,0), (-1,-1), 5),
-        ]))
-        story.append(at)
-        story.append(Spacer(1, 0.5*cm))
+        # CV Variant
+        if variant:
+            cv_content = results.get('cv_variants', {}).get(variant, '')
+            if cv_content:
+                story.append(Paragraph(f"CV Variant: {variant.upper().replace('_','-')}", h1_style))
+                for line in cv_content.split('\n'):
+                    story.append(Paragraph(line, body))
+                story.append(Spacer(1, 0.5*cm))
 
-        # Action items
-        story.append(Paragraph("Priority Action Items", h1_style))
-        for i, item in enumerate(results.get('action_items', [])[:15], 1):
-            story.append(Paragraph(f"{i}. {item}", body))
-        story.append(Spacer(1, 0.5*cm))
-
-        # Cover letter
-        cl = results.get('cover_letter', '')
-        if cl:
-            story.append(Paragraph("Cover Letter", h1_style))
-            for para in cl.split('\n\n'):
-                if para.strip():
-                    story.append(Paragraph(para.strip().replace('\n', '<br/>'), body))
-                    story.append(Spacer(1, 0.2*cm))
-
+        # Build PDF
         doc.build(story)
         buf.seek(0)
-        return buf.getvalue()
+        return buf.read()
 
     except ImportError:
         return None
-    except Exception as e:
+    except Exception:
         return None
