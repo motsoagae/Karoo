@@ -75,7 +75,7 @@ streamlit run app.py
 ## 🏗️ Architecture
 
 ```
-ats-god-v2/
+karoo-v2/
 ├── app.py                          # Streamlit frontend
 ├── requirements.txt
 ├── .env.example
