@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # ─── Page Config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="ATS-GOD v2 | AI CV Optimizer",
+    page_title="Karoo v2 | AI CV Optimizer",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -164,7 +164,7 @@ def render_sidebar():
         st.markdown("""
         <div style='text-align:center;padding:10px 0 5px'>
             <span style='font-size:2rem'>🤖</span>
-            <div style='font-weight:900;font-size:1.1rem;color:#1565C0'>ATS-GOD v2.0</div>
+            <div style='font-weight:900;font-size:1.1rem;color:#1565C0'>Karoo v2.0</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -422,7 +422,7 @@ def render_results(results: dict):
         st.download_button(
             "📄 Full Report (TXT)",
             data=txt,
-            file_name=f"ats_god_v2_{ts}.txt",
+            file_name=f"Karoo_v2_{ts}.txt",
             mime="text/plain",
             use_container_width=True
         )
@@ -435,7 +435,7 @@ def render_results(results: dict):
                 st.download_button(
                     "📝 Full Report (DOCX)",
                     data=docx,
-                    file_name=f"ats_god_v2_{ts}.docx",
+                    file_name=f"Karoo_v2_{ts}.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     use_container_width=True
                 )
@@ -466,7 +466,7 @@ def render_results(results: dict):
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🤖 ATS-GOD</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🤖 Karoo</h1>', unsafe_allow_html=True)
     st.markdown('<div class="version-badge"><span>VERSION 2.0</span></div>', unsafe_allow_html=True)
     st.markdown("""<p class="sub-header">
         11 AI Agents · Full CV Rewrite · Interview Coach · Salary Intelligence · Job URL Scraper<br>
@@ -606,10 +606,10 @@ def main():
 
             try:
                 sys.path.insert(0, ".")
-                from src.core.orchestrator import ATSGodOrchestrator
+                from src.core.orchestrator import KarooOrchestrator
 
                 # Filter agents based on feature flags
-                orch = ATSGodOrchestrator()
+                orch = KarooOrchestrator()
                 if not context.get("run_interview", True):
                     orch.agents.pop("interview_coach", None)
                 if not context.get("run_salary", True):
