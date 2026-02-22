@@ -452,7 +452,8 @@ def render_results(results: dict):
                 st.download_button(
                     "🔴 Full Report (PDF)",
                     data=pdf,
-                    file_name=f"ats_god_v2_{ts}.pdf",
+                    file_name=f"Karoo
+                    _v2_{ts}.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
