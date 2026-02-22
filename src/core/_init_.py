@@ -1,1 +1,1 @@
-"""ATS-GOD v2.0 Core"""
+"""Karoo v2.0 Core"""
