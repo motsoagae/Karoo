@@ -1,99 +1,84 @@
-"""Agent 7: Compliance Guardian v2"""
+"""Agent 9: Cover Letter Composer v2"""
 import re, time
 from typing import Dict, Any, List
 from .base_agent import BaseAgent, AgentOutput
 
-SYSTEM_PROMPT = """You are The Compliance Guardian v2 — legal ethics enforcer. GDPR, POPIA, SA labour law, truth verification.
+SYSTEM_PROMPT = """You are The Cover Letter Composer v2 — elite career writer. 90% of cover letters are ignored. Yours get interviews.
+
+Rules: Open with INSIGHT not "I am writing to apply". 3 paragraphs MAX. 280-350 words. Reference specific JD elements.
+P1 — Hook (company/industry insight or challenge)
+P2 — Proof (2-3 specific achievements matching their needs)
+P3 — Confident close (no "I hope to hear from you")
+
+SA version: slightly more formal, B-BBEE mention if relevant.
+International: punchy, direct, results-first.
 
 Respond in EXACTLY this format:
 
-COMPLIANCE_SCORE: [0-100]
-LEGAL_RISKS: [comma-separated OR NONE]
-GDPR_STATUS: [COMPLIANT/PARTIAL/NON-COMPLIANT — reason]
-POPIA_STATUS: [COMPLIANT/PARTIAL/NON-COMPLIANT — reason]
-TRUTH_FLAGS: [suspicious claims OR NONE]
-SENSITIVE_DATA: [items to remove OR NONE]
-DISCRIMINATION_RISKS: [any content that could expose candidate to bias OR NONE]
-FIXES:
-- [fix 1]
-- [fix 2]
-- [fix 3]
-SANITIZED_SUMMARY: [Rewrite professional summary removing any legally risky content]"""
+COVER_LETTER_START
+[Full cover letter — 3 paragraphs, 280-350 words]
+COVER_LETTER_END
 
-SENSITIVE_PATTERNS = {
-    'SA ID number': r'\b\d{13}\b',
-    'date of birth': r'\bDOB\b|\bdate of birth\b|\bborn:\s*\d',
-    'marital status': r'\b(married|single|divorced|widowed|separated)\b',
-    'religion': r'\b(christian|muslim|jewish|hindu|buddhist|catholic|protestant|atheist)\b',
-    'home address': r'\b\d{1,5}\s+\w+\s+(street|road|avenue|drive|lane|close|crescent)\b',
-    'photo reference': r'\[photo\]|\[image\]|photograph enclosed',
-    'salary history': r'previous salary|salary history|current salary:\s*R',
-    'id/passport explicit': r'\bID\s*number\s*:\s*\d|\bpassport\s*:\s*[A-Z]\d',
-    'race/ethnicity explicit': r'\brace:\s*\w+|\bethnicity:\s*\w+',
-    'disability explicit': r'\bdisability:\s*\w+',
-}
-EXAGGERATION_FLAGS = [
-    (r'\b(guru|ninja|rockstar|wizard|unicorn|guru)\b', 'Unprofessional buzzword'),
-    (r'\b100%\s+(success rate|client satisfaction|accuracy)\b', 'Unverifiable 100% claim'),
-    (r'saved\s+\$\s*\d{8,}', 'Implausibly large savings — verify'),
-    (r'increased\s+revenue\s+by\s+\d{3,}%', 'Very high % — ensure verifiable'),
-    (r'managed\s+budget\s+of\s+[R\$]\s*\d{10,}', 'Unusually large budget claim'),
-]
+QUALITY_SCORE: [0-100]
+PERSONALIZATION: [Generic/Basic/Good/Excellent]
+WORD_COUNT: [actual count]
+HOOK_TYPE: [Industry insight/Company challenge/Provocative stat/Direct value prop]
+TIPS:
+- [personalization tip]
+- [improvement tip]"""
 
 
-class ComplianceGuardian(BaseAgent):
+class CoverLetterAgent(BaseAgent):
     def __init__(self, llm=None):
-        super().__init__("The Compliance Guardian", llm)
+        super().__init__("The Cover Letter Composer", llm)
 
     async def analyze(self, cv_text: str, job_description: str, context: Dict) -> AgentOutput:
         t0=time.time()
-        sensitive=self._find_sensitive(cv_text)
-        truth_flags=self._flag_exaggerations(cv_text)
-        gdpr=self._gdpr_status(sensitive)
-        popia=self._popia_status(sensitive)
+        company=self._extract_company(job_description)
+        role=self._extract_role(job_description)
 
-        user_prompt=f"""CV:\n{cv_text[:4000]}\n\nContext:\n- Market: {context.get('target_market','South Africa')}\n\nPre-analysis:\n- Sensitive data: {', '.join(sensitive) if sensitive else 'None'}\n- Truth flags: {', '.join(truth_flags) if truth_flags else 'None'}\n- GDPR: {gdpr}\n- POPIA: {popia}\n\nFull compliance audit."""
+        user_prompt=f"""CV (extract 3 strongest achievements with metrics):\n{cv_text[:3500]}\n\nJD:\n{job_description[:2500]}\n\nContext:\n- Market: {context.get('target_market','South Africa')}\n- Level: {context.get('experience_level','Mid')}\n- Industry: {context.get('industry','N/A')}\n- Company: {company}\n- Role: {role}\n\nWrite a compelling, personalized cover letter that earns an interview.\nNEVER start with "I am writing to apply". Reference specific JD elements."""
 
         llm_response=self._get_llm_response(SYSTEM_PROMPT,user_prompt)
-        score=self._calc_score(sensitive,truth_flags,llm_response)
+        letter=self._extract_letter(llm_response)
+        score=self._extract_int(llm_response,'QUALITY_SCORE',70)
 
         return AgentOutput(
             agent_name=self.name, score=score,
             findings=[
-                f"Compliance Score: {score}/100",
-                f"GDPR Status: {gdpr}",
-                f"POPIA Status: {popia}",
-                f"Sensitive Data: {len(sensitive)} items — {', '.join(list(sensitive.keys())[:3]) if sensitive else 'None ✓'}",
-                f"Truth/Accuracy Flags: {len(truth_flags)} — {', '.join(truth_flags[:2]) if truth_flags else 'None ✓'}",
+                f"Cover Letter Quality: {score}/100",
+                f"Word Count: {len(letter.split())} words",
+                f"Personalization: {self._extract_line(llm_response,'PERSONALIZATION')}",
+                f"Hook Type: {self._extract_line(llm_response,'HOOK_TYPE')}",
+                f"Company Detected: {company}",
+                f"Role Detected: {role}",
             ],
-            recommendations=self._extract_fixes(llm_response,sensitive,truth_flags),
-            optimized_content=self._extract_section(llm_response,'SANITIZED_SUMMARY'),
-            raw_analysis=llm_response, weight=1.0,
+            recommendations=self._extract_tips(llm_response),
+            optimized_content=letter,
+            raw_analysis=llm_response, weight=0.8,
             execution_ms=int((time.time()-t0)*1000), ai_powered=self.llm is not None,
         )
 
-    def _find_sensitive(self, t):
-        return {l:p for l,p in SENSITIVE_PATTERNS.items() if re.search(p,t,re.IGNORECASE)}
-    def _flag_exaggerations(self, t):
-        return [l for p,l in EXAGGERATION_FLAGS if re.search(p,t,re.IGNORECASE)]
-    def _gdpr_status(self, s):
-        risks=[k for k in s if k in ['marital status','religion','date of birth','photo reference','race/ethnicity explicit']]
-        if risks: return f"NON-COMPLIANT — {', '.join(risks)}"
-        if s: return "PARTIAL — minor concerns"
-        return "COMPLIANT ✓"
-    def _popia_status(self, s):
-        risks=[k for k in s if k in ['SA ID number','home address','id/passport explicit']]
-        if risks: return f"NON-COMPLIANT — {', '.join(risks)}"
-        return "COMPLIANT ✓"
-    def _calc_score(self, s, flags, r):
-        m=re.search(r'COMPLIANCE_SCORE:\s*(\d+)',r)
-        if m: return int(m.group(1))
-        return max(20,min(100,100-(len(s)*10)-(len(flags)*5)))
-    def _extract_fixes(self, r, s, flags):
-        fixes=[]
-        m=re.search(r'FIXES:(.*?)(?:SANITIZED_SUMMARY:|$)',r,re.DOTALL)
-        if m: fixes=[l.strip().lstrip('- ') for l in m.group(1).strip().split('\n') if l.strip() and l.strip()!='-'][:4]
-        for label in list(s.keys())[:3]: fixes.insert(0,f"REMOVE immediately: {label} — never required on a CV")
-        for flag in flags[:2]: fixes.append(f"Review accuracy: {flag}")
-        return fixes[:8]
-    def _extract_section(self, r, k): m=re.search(rf'{k}:\s*(.+?)(?:\n[A-Z_]+:|$)',r,re.DOTALL); return m.group(1).strip() if m else ""
+    def _extract_company(self, jd):
+        patterns=[r'(?:at|join|company|organisation|organization):\s*([A-Z][A-Za-z\s&]{2,30})',r'^([A-Z][A-Za-z\s&]{2,30})\s+(?:is|are)\s+(?:looking|seeking|hiring)']
+        for p in patterns:
+            m=re.search(p,jd,re.MULTILINE)
+            if m: return m.group(1).strip()[:40]
+        return "[Company Name]"
+    def _extract_role(self, jd):
+        patterns=[r'(?:position|role|job title|vacancy):\s*(.+?)(?:\n|$)',r'^([\w\s/]{5,40})\n']
+        for p in patterns:
+            m=re.search(p,jd,re.IGNORECASE|re.MULTILINE)
+            if m: return m.group(1).strip()[:60]
+        return "[Role]"
+    def _extract_letter(self, r):
+        m=re.search(r'COVER_LETTER_START\s*\n(.*?)\nCOVER_LETTER_END',r,re.DOTALL)
+        if m: return m.group(1).strip()
+        m2=re.search(r'COVER_LETTER_START\s*\n(.+)',r,re.DOTALL)
+        return m2.group(1).strip()[:2000] if m2 else r[:1500]
+    def _extract_int(self, t, k, d): m=re.search(rf'{k}:\s*(\d+)',t); return int(m.group(1)) if m else d
+    def _extract_line(self, t, k): m=re.search(rf'{k}:\s*(.+?)(?:\n|$)',t); return m.group(1).strip()[:60] if m else "N/A"
+    def _extract_tips(self, r):
+        m=re.search(r'TIPS:(.*?)(?:$)',r,re.DOTALL)
+        if m: return [l.strip().lstrip('- ') for l in m.group(1).strip().split('\n') if l.strip() and l.strip()!='-'][:3]
+        return ["Add hiring manager's name if you can find it","Reference a recent company news item"]
