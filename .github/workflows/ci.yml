@@ -1,4 +1,4 @@
-name: ATS-GOD v2 CI
+name: Karoo v2 CI
 
 on:
   push:
@@ -58,7 +58,7 @@ jobs:
           from src.agents.interview_coach import InterviewCoach
           from src.agents.salary_intelligence import SalaryIntelligence
           from src.agents.cv_rewriter_agent import CVRewriterAgent
-          from src.core.orchestrator import ATSGodOrchestrator
+          from src.core.orchestrator import KarooOrchestrator
           from src.core.exporter import export_to_txt, export_to_docx, export_to_pdf
           from src.core.job_scraper import scrape_job_url, is_valid_url
           from src.ui.charts import radar_chart, score_gauge, agent_bar_chart
